@@ -11,6 +11,8 @@ function item(overrides: Record<string, string>) {
     eventstartdate: "20261101",
     eventenddate: "20261102",
     lDongRegnCd: "11",
+    mapx: "126.9779",
+    mapy: "37.5663",
     ...overrides,
   };
 }
@@ -55,6 +57,8 @@ describe("fetchActiveFestivals", () => {
           addr1: "부산광역시 해운대구 APEC로 30",
           addr2: "1층",
           lDongRegnCd: "26",
+          mapx: "129.1350266435",
+          mapy: "35.1657825587",
         }),
       ]),
     );
@@ -78,7 +82,23 @@ describe("fetchActiveFestivals", () => {
       place: "부산광역시 해운대구 APEC로 30 1층",
       address: "부산광역시 해운대구 APEC로 30",
       sidoCode: "26",
+      lat: 35.1657825587,
+      lng: 129.1350266435,
     });
+  });
+
+  test("좌표가 비어 있거나 숫자가 아니면 좌표 없이 돌려준다", async () => {
+    fetchMock.mockResolvedValueOnce(
+      apiResponse([
+        item({ contentid: "1", mapx: "", mapy: "" }),
+        item({ contentid: "2", mapx: "abc", mapy: "37.5" }),
+      ]),
+    );
+
+    const festivals = await fetchActiveFestivals("20261029");
+
+    expect(festivals.map((festival) => festival.lat)).toEqual([undefined, undefined]);
+    expect(festivals.map((festival) => festival.lng)).toEqual([undefined, undefined]);
   });
 
   test("이미 끝난 행사는 돌려주지 않는다", async () => {

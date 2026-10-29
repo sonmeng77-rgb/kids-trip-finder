@@ -5,6 +5,9 @@ export type KidsPlace = {
   phone?: string;
   /** 카카오맵 장소 페이지 */
   url: string;
+  /** 위도·경도. 데이터에 없거나 숫자가 아니면 없다. */
+  lat?: number;
+  lng?: number;
 };
 
 /** 아이와 갈 만한 장소 정보를 가져오지 못했다. 메시지에는 인증키 등 민감한 값을 담지 않는다. */

@@ -12,6 +12,8 @@ test("행사를 이름, 개최 기간, 장소가 담긴 계획 항목으로 바�
       place: "경기도 시흥시 동서로 287 갯골생태공원",
       address: "경기도 시흥시 동서로 287",
       sidoCode: "41",
+      lat: 37.3,
+      lng: 126.8,
     }),
   ).toEqual({
     kind: "events",
@@ -20,6 +22,8 @@ test("행사를 이름, 개최 기간, 장소가 담긴 계획 항목으로 바�
     name: "시흥 갯골 축제",
     period: "2026.10.30 ~ 2026.11.01",
     address: "경기도 시흥시 동서로 287 갯골생태공원",
+    lat: 37.3,
+    lng: 126.8,
   });
 });
 
@@ -44,6 +48,8 @@ test("장소를 보기의 이름표와 함께 계획 항목으로 바꾼다", ()
     address: "제주특별자치도 제주시 1",
     phone: "064-111-2222",
     url: "http://place.map.kakao.com/5",
+    lat: 33.45,
+    lng: 126.57,
   };
 
   expect(placeToPlanItem(place, "pensions")).toEqual({
@@ -54,6 +60,8 @@ test("장소를 보기의 이름표와 함께 계획 항목으로 바꾼다", ()
     address: "제주특별자치도 제주시 1",
     phone: "064-111-2222",
     url: "http://place.map.kakao.com/5",
+    lat: 33.45,
+    lng: 126.57,
   });
   expect(placeToPlanItem(place, "spots").kindLabel).toBe("가볼만한곳");
   expect(placeToPlanItem(place, "cafes").kindLabel).toBe("키즈카페");

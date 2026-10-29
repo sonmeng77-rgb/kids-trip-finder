@@ -13,7 +13,15 @@ type KakaoDocument = {
   road_address_name: string;
   phone: string;
   place_url: string;
+  x: string;
+  y: string;
 };
+
+/** 위도·경도가 둘 다 숫자일 때만 좌표로 본다. 하나라도 비었거나 숫자가 아니면 좌표가 없다. */
+function toLocation(lat: string | undefined, lng: string | undefined) {
+  const parsed = { lat: lat ? Number(lat) : NaN, lng: lng ? Number(lng) : NaN };
+  return Number.isFinite(parsed.lat) && Number.isFinite(parsed.lng) ? parsed : {};
+}
 
 type KakaoPage = {
   documents: KakaoDocument[];
@@ -76,6 +84,7 @@ export async function fetchKidsPlaces(
       address: document.road_address_name || document.address_name,
       phone: document.phone || undefined,
       url: document.place_url,
+      ...toLocation(document.y, document.x),
     })),
     truncated: meta ? meta.total_count > meta.pageable_count : false,
   };

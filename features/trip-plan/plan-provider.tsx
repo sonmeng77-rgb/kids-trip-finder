@@ -48,6 +48,7 @@ export function usePlan() {
     has: (item: Pick<PlanItem, "kind" | "id">) =>
       items.some((entry) => planItemKey(entry) === planItemKey(item)),
     toggle: store.toggle,
+    move: store.move,
     remove: store.remove,
   };
 }
