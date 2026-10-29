@@ -44,7 +44,7 @@ export default async function Home({
           <h1 className="font-heading text-2xl font-semibold tracking-tight">
             아이와 가기 좋은 축제·행사
           </h1>
-          <PlanPanel />
+          <PlanPanel kakaoAppKey={process.env.KAKAO_JAVASCRIPT_KEY} />
         </div>
         <p className="text-muted-foreground">
           지도나 목록에서 지역을 고르고, 행사는 가려는 달을 정해 보세요. 키즈카페, 키즈펜션, 가볼만한곳도 지역별로 찾아볼 수 있어요.

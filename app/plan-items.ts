@@ -13,6 +13,8 @@ export function festivalToPlanItem(festival: Festival): PlanItem {
     name: festival.title,
     period: formatFestivalPeriod(festival),
     address: festival.place,
+    lat: festival.lat,
+    lng: festival.lng,
   };
 }
 
@@ -26,5 +28,7 @@ export function placeToPlanItem(place: KidsPlace, view: PlaceView): PlanItem {
     address: place.address,
     phone: place.phone,
     url: place.url,
+    lat: place.lat,
+    lng: place.lng,
   };
 }

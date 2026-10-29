@@ -10,6 +10,8 @@ function doc(overrides: Record<string, string> = {}) {
     road_address_name: "서울 중랑구 용마산로 670",
     phone: "02-123-4567",
     place_url: "http://place.map.kakao.com/1",
+    x: "127.0916",
+    y: "37.5995",
     ...overrides,
   };
 }
@@ -60,6 +62,8 @@ describe("fetchKidsPlaces", () => {
         address: "서울 중랑구 용마산로 670",
         phone: "02-123-4567",
         url: "http://place.map.kakao.com/1",
+        lat: 37.5995,
+        lng: 127.0916,
       },
     ]);
   });
@@ -71,6 +75,17 @@ describe("fetchKidsPlaces", () => {
 
     const url = new URL(String(fetchMock.mock.calls[0][0]));
     expect(url.searchParams.get("query")).toBe("제주 키즈 펜션 숙소");
+  });
+
+  test("좌표가 비어 있거나 숫자가 아니면 좌표 없이 돌려준다", async () => {
+    fetchMock.mockResolvedValueOnce(
+      page([doc({ id: "1", x: "", y: "" }), doc({ id: "2", x: "abc", y: "37.5" })], { is_end: true }),
+    );
+
+    const { places } = await fetchKidsPlaces("서울", "키즈카페");
+
+    expect(places.map((place) => place.lat)).toEqual([undefined, undefined]);
+    expect(places.map((place) => place.lng)).toEqual([undefined, undefined]);
   });
 
   test("도로명 주소가 없으면 지번 주소를 쓰고, 전화번호가 없으면 비워 둔다", async () => {

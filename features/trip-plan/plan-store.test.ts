@@ -103,6 +103,84 @@ describe("createPlanStore", () => {
     expect(createPlanStore(storage).getSnapshot().map((entry) => entry.id)).toEqual(["b"]);
   });
 
+  describe("move", () => {
+    const names = (store: ReturnType<typeof createPlanStore>) =>
+      store.getSnapshot().map((entry) => entry.id);
+
+    function storeWith(...ids: string[]) {
+      const storage = memoryStorage();
+      const store = createPlanStore(storage);
+      ids.forEach((id) => store.toggle(item({ id })));
+      return { store, storage };
+    }
+
+    test("위로 옮기면 바로 위 항목과 자리를 바꾼다", () => {
+      const { store } = storeWith("a", "b", "c");
+
+      store.move("cafes:c", "up");
+
+      expect(names(store)).toEqual(["a", "c", "b"]);
+    });
+
+    test("아래로 옮기면 바로 아래 항목과 자리를 바꾼다", () => {
+      const { store } = storeWith("a", "b", "c");
+
+      store.move("cafes:a", "down");
+
+      expect(names(store)).toEqual(["b", "a", "c"]);
+    });
+
+    test("맨 위를 위로, 맨 아래를 아래로 옮기려 해도 아무 일도 없다", () => {
+      const { store } = storeWith("a", "b");
+      const listener = vi.fn();
+      store.subscribe(listener);
+
+      store.move("cafes:a", "up");
+      store.move("cafes:b", "down");
+
+      expect(names(store)).toEqual(["a", "b"]);
+      expect(listener).not.toHaveBeenCalled();
+    });
+
+    test("없는 항목을 옮기려 해도 아무 일도 없다", () => {
+      const { store } = storeWith("a", "b");
+
+      store.move("cafes:nope", "up");
+
+      expect(names(store)).toEqual(["a", "b"]);
+    });
+
+    test("바꾼 순서를 저장소에 쓰고 새 스토어가 그대로 읽는다", () => {
+      const { store, storage } = storeWith("a", "b", "c");
+
+      store.move("cafes:c", "up");
+
+      expect(names(createPlanStore(storage))).toEqual(["a", "c", "b"]);
+    });
+
+    test("구독자에게 바뀐 것을 알린다", () => {
+      const { store } = storeWith("a", "b");
+      const listener = vi.fn();
+      store.subscribe(listener);
+
+      store.move("cafes:b", "up");
+
+      expect(listener).toHaveBeenCalledTimes(1);
+    });
+
+    test("다른 탭이 그 사이에 담은 곳을 잃지 않고 순서를 바꾼다", () => {
+      const storage = memoryStorage();
+      const tabA = createPlanStore(storage);
+      const tabB = createPlanStore(storage);
+      tabA.toggle(item({ id: "a" }));
+      tabA.toggle(item({ id: "b" }));
+
+      tabB.move("cafes:b", "up");
+
+      expect(names(createPlanStore(storage))).toEqual(["b", "a"]);
+    });
+  });
+
   test("바뀌면 구독자에게 알리고, 구독을 풀면 알리지 않는다", () => {
     const store = createPlanStore(memoryStorage());
     const listener = vi.fn();
@@ -168,6 +246,25 @@ describe("createPlanStore", () => {
         memoryStorage({ "kids-trip-finder:plan": JSON.stringify({ items: [] }) }),
       ).getSnapshot(),
     ).toEqual([]);
+  });
+
+  test("좌표가 있는 항목은 좌표까지 그대로 저장하고 읽는다", () => {
+    const storage = memoryStorage();
+    const located = item({ id: "loc", lat: 37.5, lng: 127.0 });
+    createPlanStore(storage).toggle(located);
+
+    expect(createPlanStore(storage).getSnapshot()).toEqual([located]);
+  });
+
+  test("좌표가 숫자가 아닌 저장된 항목은 버리고, 좌표가 없는 예전 항목은 그대로 읽는다", () => {
+    const stored = JSON.stringify([
+      item({ id: "old" }),
+      { ...item({ id: "bad" }), lat: "37.5", lng: 127 },
+    ]);
+
+    const store = createPlanStore(memoryStorage({ "kids-trip-finder:plan": stored }));
+
+    expect(store.getSnapshot().map((entry) => entry.id)).toEqual(["old"]);
   });
 
   test("서버에서는 항상 빈 계획을 돌려준다", () => {

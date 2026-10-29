@@ -11,6 +11,9 @@ export type PlanItem = {
   period?: string;
   phone?: string;
   url?: string;
+  /** 위도·경도. 없으면 지도에 표시하지 않는다. */
+  lat?: number;
+  lng?: number;
 };
 
 export function planItemKey(item: Pick<PlanItem, "kind" | "id">): string {
@@ -28,6 +31,8 @@ export function isPlanItem(value: unknown): value is PlanItem {
     typeof candidate.address === "string" &&
     (candidate.period === undefined || typeof candidate.period === "string") &&
     (candidate.phone === undefined || typeof candidate.phone === "string") &&
-    (candidate.url === undefined || typeof candidate.url === "string")
+    (candidate.url === undefined || typeof candidate.url === "string") &&
+    (candidate.lat === undefined || typeof candidate.lat === "number") &&
+    (candidate.lng === undefined || typeof candidate.lng === "number")
   );
 }

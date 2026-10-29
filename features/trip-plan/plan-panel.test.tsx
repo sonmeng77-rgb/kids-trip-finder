@@ -1,7 +1,13 @@
 import { fireEvent, render, screen, within } from "@testing-library/react";
-import { describe, expect, test } from "vitest";
+import { describe, expect, test, vi } from "vitest";
 
-import { createPlanStore, PlanPanel, PlanProvider, type PlanItem } from "@/features/trip-plan";
+import {
+  createPlanStore,
+  PlanPanel,
+  PlanProvider,
+  type KakaoMapsApi,
+  type PlanItem,
+} from "@/features/trip-plan";
 
 const cafe: PlanItem = {
   kind: "cafes",
@@ -32,12 +38,15 @@ const memory = () => {
   };
 };
 
-function renderPanel(items: PlanItem[] = []) {
+function renderPanel(
+  items: PlanItem[] = [],
+  props: { kakaoAppKey?: string; loadMaps?: (key: string) => Promise<KakaoMapsApi> } = {},
+) {
   const store = createPlanStore(memory());
   items.forEach((item) => store.toggle(item));
   render(
     <PlanProvider store={store}>
-      <PlanPanel />
+      <PlanPanel {...props} />
     </PlanProvider>,
   );
   return store;
@@ -97,5 +106,125 @@ describe("PlanPanel", () => {
     fireEvent.click(screen.getByRole("button", { name: /내 계획/ }));
 
     expect(screen.getByText(/이 브라우저에만 저장/)).toBeInTheDocument();
+  });
+});
+
+const located = (id: string, name: string, lat: number, lng: number): PlanItem => ({
+  kind: "spots",
+  id,
+  kindLabel: "가볼만한곳",
+  name,
+  address: "주소 " + name,
+  lat,
+  lng,
+});
+
+const seoulHall = located("s", "서울시청", 37.5663, 126.9779);
+const busanHall = located("b", "부산시청", 35.1796, 129.0756);
+const noLocation: PlanItem = {
+  kind: "cafes",
+  id: "n",
+  kindLabel: "키즈카페",
+  name: "위치 없는 카페",
+  address: "옛날에 담은 주소",
+};
+
+const open = () => fireEvent.click(screen.getByRole("button", { name: /내 계획/ }));
+const neverLoads = () => new Promise<KakaoMapsApi>(() => {});
+
+describe("PlanPanel 순서와 거리", () => {
+  test("항목마다 담은 순서의 번호를 보여준다", () => {
+    renderPanel([seoulHall, noLocation, busanHall], { loadMaps: neverLoads, kakaoAppKey: "k" });
+    open();
+
+    const items = screen.getAllByRole("listitem");
+    expect(within(items[0]).getByText("1")).toBeInTheDocument();
+    expect(within(items[1]).getByText("2")).toBeInTheDocument();
+    expect(within(items[2]).getByText("3")).toBeInTheDocument();
+  });
+
+  test("맨 위 항목의 위 버튼과 맨 아래 항목의 아래 버튼은 눌리지 않는다", () => {
+    renderPanel([seoulHall, busanHall], { loadMaps: neverLoads, kakaoAppKey: "k" });
+    open();
+
+    expect(screen.getByRole("button", { name: "서울시청 위로" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "서울시청 아래로" })).toBeEnabled();
+    expect(screen.getByRole("button", { name: "부산시청 아래로" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "부산시청 위로" })).toBeEnabled();
+  });
+
+  test("아래로 버튼을 누르면 순서와 번호가 바뀐다", () => {
+    const store = renderPanel([seoulHall, busanHall], { loadMaps: neverLoads, kakaoAppKey: "k" });
+    open();
+
+    fireEvent.click(screen.getByRole("button", { name: "서울시청 아래로" }));
+
+    expect(store.getSnapshot().map((entry) => entry.name)).toEqual(["부산시청", "서울시청"]);
+    const items = screen.getAllByRole("listitem");
+    expect(within(items[0]).getByText("부산시청")).toBeInTheDocument();
+    expect(within(items[0]).getByText("1")).toBeInTheDocument();
+    expect(within(items[1]).getByText("서울시청")).toBeInTheDocument();
+  });
+
+  test("이웃한 두 곳 사이의 직선거리와 총거리, 직선거리 기준 안내를 보여준다", () => {
+    renderPanel([seoulHall, busanHall], { loadMaps: neverLoads, kakaoAppKey: "k" });
+    open();
+
+    const items = screen.getAllByRole("listitem");
+    expect(within(items[1]).getByText(/1번에서 직선거리 325.1km/)).toBeInTheDocument();
+    expect(screen.getByText(/총 직선거리 325.1km/)).toBeInTheDocument();
+    expect(screen.getByText(/직선거리 기준/)).toBeInTheDocument();
+  });
+
+  test("좌표가 없는 항목은 거리에서 빠지고 좌표가 있는 이웃끼리 이어지며, 지도에 없다고 알려준다", () => {
+    const store = renderPanel([seoulHall, noLocation, busanHall], {
+      loadMaps: neverLoads,
+      kakaoAppKey: "k",
+    });
+    open();
+
+    const items = screen.getAllByRole("listitem");
+    expect(within(items[1]).getByText("위치 정보가 없어 지도에 표시되지 않아요")).toBeInTheDocument();
+    expect(within(items[2]).getByText(/1번에서 직선거리 325.1km/)).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "위치 없는 카페 아래로" }));
+    expect(store.getSnapshot().map((entry) => entry.name)).toEqual(["서울시청", "부산시청", "위치 없는 카페"]);
+  });
+
+  test("좌표가 있는 곳이 하나뿐이면 거리를 보여주지 않는다", () => {
+    renderPanel([seoulHall, noLocation], { loadMaps: neverLoads, kakaoAppKey: "k" });
+    open();
+
+    expect(screen.queryByText(/총 직선거리/)).toBeNull();
+    expect(screen.queryByText(/에서 직선거리/)).toBeNull();
+  });
+
+  test("좌표가 있는 곳이 하나도 없으면 지도를 불러오지 않고 안내만 보여준다", () => {
+    const loadMaps = vi.fn();
+    renderPanel([noLocation], { loadMaps, kakaoAppKey: "k" });
+    open();
+
+    expect(screen.getByText("지도에 표시할 곳이 아직 없어요")).toBeInTheDocument();
+    expect(loadMaps).not.toHaveBeenCalled();
+  });
+
+  test("좌표가 있는 곳이 있으면 키와 함께 지도를 불러온다", () => {
+    const loadMaps = vi.fn(neverLoads);
+    renderPanel([seoulHall], { loadMaps, kakaoAppKey: "the-key" });
+    open();
+
+    expect(loadMaps).toHaveBeenCalledWith("the-key");
+  });
+
+  test("지도 불러오기에 실패해도 목록과 순서 바꾸기는 쓸 수 있다", async () => {
+    const store = renderPanel([seoulHall, busanHall], {
+      loadMaps: () => Promise.reject(new Error("blocked")),
+      kakaoAppKey: "k",
+    });
+    open();
+
+    expect(await screen.findByText(/지도를 불러오지 못했어요/)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "서울시청 아래로" }));
+    expect(store.getSnapshot().map((entry) => entry.name)).toEqual(["부산시청", "서울시청"]);
   });
 });

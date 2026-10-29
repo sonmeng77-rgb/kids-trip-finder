@@ -64,6 +64,17 @@ export function createPlanStore(storage: PlanStorage | null) {
           : [...items, item],
       );
     },
+    /** 항목을 한 칸 위나 아래로 옮긴다. 맨 끝이거나 없는 항목이면 아무 일도 하지 않는다. */
+    move(key: string, direction: "up" | "down") {
+      refresh();
+      const from = items.findIndex((entry) => planItemKey(entry) === key);
+      const to = direction === "up" ? from - 1 : from + 1;
+      if (from === -1 || to < 0 || to >= items.length) return;
+
+      const next = [...items];
+      [next[from], next[to]] = [next[to], next[from]];
+      commit(next);
+    },
     remove(key: string) {
       refresh();
       commit(items.filter((entry) => planItemKey(entry) !== key));

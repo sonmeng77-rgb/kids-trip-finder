@@ -11,7 +11,15 @@ type TourApiItem = {
   eventstartdate: string;
   eventenddate: string;
   lDongRegnCd: string;
+  mapx: string;
+  mapy: string;
 };
+
+/** 위도·경도가 둘 다 숫자일 때만 좌표로 본다. 하나라도 비었거나 숫자가 아니면 좌표가 없다. */
+function toLocation(lat: string | undefined, lng: string | undefined) {
+  const parsed = { lat: lat ? Number(lat) : NaN, lng: lng ? Number(lng) : NaN };
+  return Number.isFinite(parsed.lat) && Number.isFinite(parsed.lng) ? parsed : {};
+}
 
 /**
  * 한국관광공사 TourAPI 행사 조회로 오늘 진행 중이거나 앞으로 열릴 행사를 가져온다.
@@ -61,6 +69,7 @@ export async function fetchActiveFestivals(today: string): Promise<Festival[]> {
       place: [item.addr1, item.addr2].filter(Boolean).join(" "),
       address: item.addr1,
       sidoCode: item.lDongRegnCd,
+      ...toLocation(item.mapy, item.mapx),
     }))
     .sort(
       (a, b) =>
