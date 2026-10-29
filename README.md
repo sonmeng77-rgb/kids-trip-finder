@@ -76,3 +76,8 @@ flowchart LR
 ```
 
 파이프라인 밖에서는 `project-knowledge`, `maintain-project-context`, `add-stack-context`, `build-prototype`, `explain-visually`, `tdd`가 각자의 조건에 따라 켜집니다. `project-knowledge`는 `GLOSSARY.md`, `docs/decisions/`, `docs/follow-ups/`에 다음 작업에서도 재사용할 지식과 후속 항목을 남깁니다. Git 작업은 `commit`, `pull`, `push`, `pr`, `merge`가 해당 요청에 맞춰 처리합니다.
+
+## 출처
+
+- 시·도 지도 경계: [MapSVG South Korea](https://mapsvg.com/maps/south-korea)를 [@svg-maps/south-korea](https://www.npmjs.com/package/@svg-maps/south-korea)가 가공한 것으로, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) 라이선스입니다.
+- 축제·행사 정보: 한국관광공사 국문 관광정보 서비스(TourAPI), 공공데이터포털.
