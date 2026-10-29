@@ -51,6 +51,19 @@ describe("FestivalList", () => {
     expect(titles[1]).toContain("나중에 열리는 축제");
   });
 
+  test("항목마다 바깥에서 받은 동작을 그 항목으로 그려준다", () => {
+    render(
+      <FestivalList
+        festivals={[festival({ id: "1", title: "첫째" }), festival({ id: "2", title: "둘째" })]}
+        renderAction={(item) => <button type="button">담기 {item.title}</button>}
+      />,
+    );
+
+    const items = screen.getAllByRole("listitem");
+    expect(within(items[0]).getByRole("button", { name: "담기 첫째" })).toBeInTheDocument();
+    expect(within(items[1]).getByRole("button", { name: "담기 둘째" })).toBeInTheDocument();
+  });
+
   test("행사가 없으면 오류가 아닌 행사 없음 안내를 보여준다", () => {
     render(<FestivalList festivals={[]} />);
 

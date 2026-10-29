@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import { FestivalListSkeleton, selectableMonths, todayInSeoul } from "@/features/festival";
 import { KidsPlaceRegionPrompt } from "@/features/kids-place";
 import { findRegion, REGIONS, RegionMap } from "@/features/region";
+import { PlanPanel } from "@/features/trip-plan";
 
 import { FestivalFilters } from "./festival-filters";
 import { filterHref, parseView } from "./filter-href";
@@ -39,9 +40,12 @@ export default async function Home({
   return (
     <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-6 px-4 py-8 sm:px-6">
       <header className="flex flex-col gap-2">
-        <h1 className="font-heading text-2xl font-semibold tracking-tight">
-          아이와 가기 좋은 축제·행사
-        </h1>
+        <div className="flex items-start justify-between gap-3">
+          <h1 className="font-heading text-2xl font-semibold tracking-tight">
+            아이와 가기 좋은 축제·행사
+          </h1>
+          <PlanPanel />
+        </div>
         <p className="text-muted-foreground">
           지도나 목록에서 지역을 고르고, 행사는 가려는 달을 정해 보세요. 키즈카페, 키즈펜션, 가볼만한곳도 지역별로 찾아볼 수 있어요.
         </p>

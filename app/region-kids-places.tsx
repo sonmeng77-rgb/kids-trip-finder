@@ -5,7 +5,9 @@ import {
   KidsPlaceLoadError,
 } from "@/features/kids-place";
 import { belongsToRegion, type Region } from "@/features/region";
+import { AddToPlanButton } from "@/features/trip-plan";
 
+import { placeToPlanItem } from "./plan-items";
 import { PLACE_VIEWS, type PlaceView } from "./place-views";
 
 /**
@@ -34,6 +36,7 @@ export async function RegionKidsPlaces({
       places={result.places.filter((place) => belongsToRegion(region.id, place.address))}
       truncated={result.truncated}
       emptyTitle={emptyTitle}
+      renderAction={(place) => <AddToPlanButton item={placeToPlanItem(place, view)} />}
     />
   );
 }
