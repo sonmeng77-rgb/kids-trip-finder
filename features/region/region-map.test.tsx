@@ -21,6 +21,15 @@ describe("RegionMap", () => {
     );
   });
 
+  test("각 시·도로 이동하는 주소를 바깥에서 정할 수 있다", () => {
+    render(<RegionMap hrefFor={(id) => `/?region=${id}&month=2026-11`} />);
+
+    expect(screen.getByRole("link", { name: "서울" })).toHaveAttribute(
+      "href",
+      "/?region=seoul&month=2026-11",
+    );
+  });
+
   test("처음에는 선택된 시·도가 없다", () => {
     render(<RegionMap />);
 

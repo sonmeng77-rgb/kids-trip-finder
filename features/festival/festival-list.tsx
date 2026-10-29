@@ -34,7 +34,7 @@ export function FestivalList({ festivals }: { festivals: Festival[] }) {
           </EmptyMedia>
           <EmptyTitle>진행 중이거나 예정된 행사가 없습니다</EmptyTitle>
           <EmptyDescription>
-            다른 지역을 선택하면 그 지역의 행사를 볼 수 있어요.
+            시·도나 월을 바꿔 보세요.
           </EmptyDescription>
         </EmptyHeader>
       </Empty>
