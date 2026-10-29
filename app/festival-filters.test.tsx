@@ -25,6 +25,13 @@ describe("FestivalFilters", () => {
     expect(screen.getByRole("combobox", { name: "월" })).toHaveTextContent("전체");
   });
 
+  test("키즈카페를 보는 동안에는 월 드롭다운을 보여주지 않는다", () => {
+    render(<FestivalFilters regions={regions} months={months} view="cafes" />);
+
+    expect(screen.getByRole("combobox", { name: "시·도" })).toBeInTheDocument();
+    expect(screen.queryByRole("combobox", { name: "월" })).toBeNull();
+  });
+
   test("고른 시·도와 월을 보여준다", () => {
     render(
       <FestivalFilters regions={regions} months={months} regionId="busan" month="2026-11" />,
