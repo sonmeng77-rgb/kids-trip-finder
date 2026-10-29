@@ -29,7 +29,14 @@ const LABEL_POSITIONS: Record<RegionId, [number, number]> = {
 /** 면적이 작아 라벨을 작게 써야 하는 시·도 */
 const SMALL_REGIONS = new Set<RegionId>(["seoul", "incheon", "sejong", "daejeon", "gwangju", "ulsan"]);
 
-export function RegionMap({ selectedId }: { selectedId?: RegionId }) {
+export function RegionMap({
+  selectedId,
+  hrefFor = (id) => `/?region=${id}`,
+}: {
+  selectedId?: RegionId;
+  /** 시·도를 눌렀을 때 이동할 주소 */
+  hrefFor?: (id: RegionId) => string;
+}) {
   return (
     <nav aria-label="대한민국 시·도 지도">
       <svg
@@ -44,7 +51,7 @@ export function RegionMap({ selectedId }: { selectedId?: RegionId }) {
           return (
             <Link
               key={region.id}
-              href={`/?region=${region.id}`}
+              href={hrefFor(region.id)}
               aria-label={region.name}
               aria-current={selected ? "true" : undefined}
               className="group outline-none"
