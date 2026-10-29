@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/select";
 import type { RegionId } from "@/features/region";
 
-import { filterHref } from "./filter-href";
+import { filterHref, type View } from "./filter-href";
 
 type Option = { value: string; label: string };
 
@@ -24,11 +24,13 @@ export function FestivalFilters({
   months,
   regionId,
   month,
+  view = "events",
 }: {
   regions: Option[];
   months: Option[];
   regionId?: RegionId;
   month?: string;
+  view?: View;
 }) {
   const router = useRouter();
   const regionItems = [{ value: ALL, label: "전국" }, ...regions];
@@ -44,6 +46,7 @@ export function FestivalFilters({
             filterHref({
               regionId: !value || value === ALL ? undefined : (value as RegionId),
               month,
+              view,
             }),
           )
         }
@@ -60,26 +63,32 @@ export function FestivalFilters({
         </SelectContent>
       </Select>
 
-      <Select
-        items={monthItems}
-        value={month ?? ALL}
-        onValueChange={(value) =>
-          router.push(
-            filterHref({ regionId, month: !value || value === ALL ? undefined : value }),
-          )
-        }
-      >
-        <SelectTrigger aria-label="월" className="w-40">
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          {monthItems.map((item) => (
-            <SelectItem key={item.value} value={item.value}>
-              {item.label}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+      {view === "events" && (
+        <Select
+          items={monthItems}
+          value={month ?? ALL}
+          onValueChange={(value) =>
+            router.push(
+              filterHref({
+                regionId,
+                month: !value || value === ALL ? undefined : value,
+                view,
+              }),
+            )
+          }
+        >
+          <SelectTrigger aria-label="월" className="w-40">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {monthItems.map((item) => (
+              <SelectItem key={item.value} value={item.value}>
+                {item.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      )}
     </div>
   );
 }
