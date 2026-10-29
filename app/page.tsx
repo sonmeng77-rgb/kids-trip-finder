@@ -1,13 +1,14 @@
 import { Suspense } from "react";
 
 import { FestivalListSkeleton, selectableMonths, todayInSeoul } from "@/features/festival";
-import { KidsCafeRegionPrompt } from "@/features/kids-cafe";
+import { KidsPlaceRegionPrompt } from "@/features/kids-place";
 import { findRegion, REGIONS, RegionMap } from "@/features/region";
 
 import { FestivalFilters } from "./festival-filters";
 import { filterHref, type View } from "./filter-href";
 import { RegionFestivals } from "./region-festivals";
-import { RegionKidsCafes } from "./region-kids-cafes";
+import { PLACE_VIEWS } from "./place-views";
+import { RegionKidsPlaces } from "./region-kids-places";
 import { ViewTabs } from "./view-tabs";
 
 type SearchParams = { [key: string]: string | string[] | undefined };
@@ -26,11 +27,13 @@ export default async function Home({
   const months = selectableMonths(todayInSeoul());
   const selectedMonth = months.find((option) => option.value === single(params.month));
   const month = selectedMonth?.value;
-  const view: View = single(params.view) === "cafes" ? "cafes" : "events";
+  const requestedView = single(params.view);
+  const view: View =
+    requestedView === "cafes" || requestedView === "pensions" ? requestedView : "events";
 
   const heading =
-    view === "cafes"
-      ? `${region ? `${region.name} 지역` : "전국"} 키즈카페`
+    view !== "events"
+      ? `${region ? `${region.name} 지역` : "전국"} ${PLACE_VIEWS[view].subject}`
       : [selectedMonth?.label, region ? `${region.name} 지역` : "전국", "행사"]
           .filter(Boolean)
           .join(" ");
@@ -42,7 +45,7 @@ export default async function Home({
           아이와 가기 좋은 축제·행사
         </h1>
         <p className="text-muted-foreground">
-          지도나 목록에서 지역을 고르고, 행사는 가려는 달을 정해 보세요. 키즈카페도 지역별로 찾아볼 수 있어요.
+          지도나 목록에서 지역을 고르고, 행사는 가려는 달을 정해 보세요. 키즈카페와 키즈펜션도 지역별로 찾아볼 수 있어요.
         </p>
       </header>
 
@@ -65,13 +68,13 @@ export default async function Home({
           <h2 id="festival-heading" className="text-lg font-semibold">
             {heading}
           </h2>
-          {view === "cafes" ? (
+          {view !== "events" ? (
             region ? (
-              <Suspense key={`cafes-${region.id}`} fallback={<FestivalListSkeleton />}>
-                <RegionKidsCafes region={region} />
+              <Suspense key={`${view}-${region.id}`} fallback={<FestivalListSkeleton />}>
+                <RegionKidsPlaces region={region} view={view} />
               </Suspense>
             ) : (
-              <KidsCafeRegionPrompt />
+              <KidsPlaceRegionPrompt />
             )
           ) : (
             <Suspense

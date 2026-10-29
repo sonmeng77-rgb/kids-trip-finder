@@ -1,4 +1,4 @@
-import { KidsCafeFetchError, type KidsCafe } from "./kids-cafe";
+import { KidsPlaceFetchError, type KidsPlace } from "./kids-place";
 
 const KEYWORD_SEARCH_URL = "https://dapi.kakao.com/v2/local/search/keyword.json";
 
@@ -36,28 +36,29 @@ async function fetchPage(
       next: { revalidate: 3600 },
     });
     if (!response.ok) {
-      throw new KidsCafeFetchError(`키즈카페 검색 API가 ${response.status} 응답을 돌려줬습니다.`);
+      throw new KidsPlaceFetchError(`장소 검색 API가 ${response.status} 응답을 돌려줬습니다.`);
     }
     return await response.json();
   } catch (error) {
-    if (error instanceof KidsCafeFetchError) throw error;
-    throw new KidsCafeFetchError("키즈카페 검색 API에 연결하지 못했습니다.");
+    if (error instanceof KidsPlaceFetchError) throw error;
+    throw new KidsPlaceFetchError("장소 검색 API에 연결하지 못했습니다.");
   }
 }
 
 /**
- * 카카오 로컬 키워드 검색으로 "<지역명> 키즈카페"를 찾는다. 최대 45곳까지 가져오며,
+ * 카카오 로컬 키워드 검색으로 "<지역명> <키워드>"를 찾는다(예: 키즈카페, 키즈 펜션 숙소). 최대 45곳까지 가져오며,
  * 검색된 곳이 그보다 많으면 truncated로 알린다.
  */
-export async function fetchKidsCafes(
+export async function fetchKidsPlaces(
   regionName: string,
-): Promise<{ cafes: KidsCafe[]; truncated: boolean }> {
+  keyword: string,
+): Promise<{ places: KidsPlace[]; truncated: boolean }> {
   const apiKey = process.env.KAKAO_REST_API_KEY;
   if (!apiKey) {
-    throw new KidsCafeFetchError("KAKAO_REST_API_KEY가 설정되지 않았습니다.");
+    throw new KidsPlaceFetchError("KAKAO_REST_API_KEY가 설정되지 않았습니다.");
   }
 
-  const query = `${regionName} 키즈카페`;
+  const query = `${regionName} ${keyword}`;
   const documents: KakaoDocument[] = [];
   let meta: KakaoPage["meta"] | undefined;
 
@@ -69,7 +70,7 @@ export async function fetchKidsCafes(
   }
 
   return {
-    cafes: documents.map((document) => ({
+    places: documents.map((document) => ({
       id: document.id,
       name: document.place_name,
       address: document.road_address_name || document.address_name,

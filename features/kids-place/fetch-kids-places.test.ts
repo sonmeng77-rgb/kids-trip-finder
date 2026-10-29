@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 
-import { fetchKidsCafes, KidsCafeFetchError } from "@/features/kids-cafe";
+import { fetchKidsPlaces, KidsPlaceFetchError } from "@/features/kids-place";
 
 function doc(overrides: Record<string, string> = {}) {
   return {
@@ -28,7 +28,7 @@ function page(
   });
 }
 
-describe("fetchKidsCafes", () => {
+describe("fetchKidsPlaces", () => {
   const fetchMock = vi.fn();
 
   beforeEach(() => {
@@ -45,7 +45,7 @@ describe("fetchKidsCafes", () => {
   test("지역명으로 키즈카페를 검색해 이름, 주소, 전화번호, 카카오맵 링크를 돌려준다", async () => {
     fetchMock.mockResolvedValueOnce(page([doc()], { is_end: true }));
 
-    const { cafes } = await fetchKidsCafes("서울");
+    const { places } = await fetchKidsPlaces("서울", "키즈카페");
 
     const request = fetchMock.mock.calls[0];
     const url = new URL(String(request[0]));
@@ -53,7 +53,7 @@ describe("fetchKidsCafes", () => {
     expect(url.searchParams.get("page")).toBe("1");
     expect(request[1].headers.Authorization).toBe("KakaoAK test-key");
 
-    expect(cafes).toEqual([
+    expect(places).toEqual([
       {
         id: "1",
         name: "서울형키즈카페 망우본동점",
@@ -64,15 +64,24 @@ describe("fetchKidsCafes", () => {
     ]);
   });
 
+  test("검색어의 키워드에 따라 지역명 뒤에 그 키워드를 붙여 검색한다", async () => {
+    fetchMock.mockResolvedValueOnce(page([doc()], { is_end: true }));
+
+    await fetchKidsPlaces("제주", "키즈 펜션 숙소");
+
+    const url = new URL(String(fetchMock.mock.calls[0][0]));
+    expect(url.searchParams.get("query")).toBe("제주 키즈 펜션 숙소");
+  });
+
   test("도로명 주소가 없으면 지번 주소를 쓰고, 전화번호가 없으면 비워 둔다", async () => {
     fetchMock.mockResolvedValueOnce(
       page([doc({ road_address_name: "", phone: "" })], { is_end: true }),
     );
 
-    const { cafes } = await fetchKidsCafes("서울");
+    const { places } = await fetchKidsPlaces("서울", "키즈카페");
 
-    expect(cafes[0].address).toBe("서울 중랑구 망우본동 1");
-    expect(cafes[0].phone).toBeUndefined();
+    expect(places[0].address).toBe("서울 중랑구 망우본동 1");
+    expect(places[0].phone).toBeUndefined();
   });
 
   test("마지막 쪽이 아니면 다음 쪽을 이어서 가져오고 마지막 쪽에서 멈춘다", async () => {
@@ -80,11 +89,11 @@ describe("fetchKidsCafes", () => {
       .mockResolvedValueOnce(page([doc({ id: "1" })], { is_end: false }))
       .mockResolvedValueOnce(page([doc({ id: "2" })], { is_end: true }));
 
-    const { cafes } = await fetchKidsCafes("서울");
+    const { places } = await fetchKidsPlaces("서울", "키즈카페");
 
     expect(fetchMock).toHaveBeenCalledTimes(2);
     expect(new URL(String(fetchMock.mock.calls[1][0])).searchParams.get("page")).toBe("2");
-    expect(cafes.map((cafe) => cafe.id)).toEqual(["1", "2"]);
+    expect(places.map((place) => place.id)).toEqual(["1", "2"]);
   });
 
   test("끝이 아니어도 3쪽까지만 가져온다", async () => {
@@ -92,7 +101,7 @@ describe("fetchKidsCafes", () => {
       page([doc()], { is_end: false, total_count: 498, pageable_count: 45 }),
     );
 
-    await fetchKidsCafes("서울");
+    await fetchKidsPlaces("서울", "키즈카페");
 
     expect(fetchMock).toHaveBeenCalledTimes(3);
   });
@@ -102,7 +111,7 @@ describe("fetchKidsCafes", () => {
       page([doc()], { is_end: true, total_count: 498, pageable_count: 45 }),
     );
 
-    await expect(fetchKidsCafes("서울")).resolves.toMatchObject({ truncated: true });
+    await expect(fetchKidsPlaces("서울", "키즈카페")).resolves.toMatchObject({ truncated: true });
   });
 
   test("검색된 곳을 모두 가져왔으면 일부만 가져온 것이 아니다", async () => {
@@ -110,11 +119,11 @@ describe("fetchKidsCafes", () => {
       page([doc()], { is_end: true, total_count: 30, pageable_count: 30 }),
     );
 
-    await expect(fetchKidsCafes("서울")).resolves.toMatchObject({ truncated: false });
+    await expect(fetchKidsPlaces("서울", "키즈카페")).resolves.toMatchObject({ truncated: false });
   });
 });
 
-describe("fetchKidsCafes 실패", () => {
+describe("fetchKidsPlaces 실패", () => {
   const fetchMock = vi.fn();
 
   beforeEach(() => {
@@ -128,27 +137,27 @@ describe("fetchKidsCafes 실패", () => {
     vi.unstubAllGlobals();
   });
 
-  test("API가 거부하면 KidsCafeFetchError로 실패하고 키는 메시지에 담기지 않는다", async () => {
+  test("API가 거부하면 KidsPlaceFetchError로 실패하고 키는 메시지에 담기지 않는다", async () => {
     fetchMock.mockResolvedValueOnce(
       Response.json({ errorType: "NotAuthorizedError", message: "disabled" }, { status: 403 }),
     );
 
-    const failure = await fetchKidsCafes("서울").catch((error) => error);
+    const failure = await fetchKidsPlaces("서울", "키즈카페").catch((error) => error);
 
-    expect(failure).toBeInstanceOf(KidsCafeFetchError);
+    expect(failure).toBeInstanceOf(KidsPlaceFetchError);
     expect(failure.message).not.toContain("test-key");
   });
 
-  test("API 서버에 닿지 못해도 KidsCafeFetchError로 실패한다", async () => {
+  test("API 서버에 닿지 못해도 KidsPlaceFetchError로 실패한다", async () => {
     fetchMock.mockRejectedValueOnce(new TypeError("fetch failed"));
 
-    await expect(fetchKidsCafes("서울")).rejects.toBeInstanceOf(KidsCafeFetchError);
+    await expect(fetchKidsPlaces("서울", "키즈카페")).rejects.toBeInstanceOf(KidsPlaceFetchError);
   });
 
-  test("인증키가 설정되지 않았으면 API를 호출하지 않고 KidsCafeFetchError로 실패한다", async () => {
+  test("인증키가 설정되지 않았으면 API를 호출하지 않고 KidsPlaceFetchError로 실패한다", async () => {
     vi.stubEnv("KAKAO_REST_API_KEY", "");
 
-    await expect(fetchKidsCafes("서울")).rejects.toBeInstanceOf(KidsCafeFetchError);
+    await expect(fetchKidsPlaces("서울", "키즈카페")).rejects.toBeInstanceOf(KidsPlaceFetchError);
     expect(fetchMock).not.toHaveBeenCalled();
   });
 });

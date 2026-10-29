@@ -1,8 +1,8 @@
-export { fetchKidsCafes } from "./fetch-kids-cafes";
-export { KidsCafeFetchError } from "./kids-cafe";
-export type { KidsCafe } from "./kids-cafe";
+export { fetchKidsPlaces } from "./fetch-kids-places";
+export { KidsPlaceFetchError } from "./kids-place";
+export type { KidsPlace } from "./kids-place";
 export {
-  KidsCafeList,
-  KidsCafeLoadError,
-  KidsCafeRegionPrompt,
-} from "./kids-cafe-list";
+  KidsPlaceList,
+  KidsPlaceLoadError,
+  KidsPlaceRegionPrompt,
+} from "./kids-place-list";

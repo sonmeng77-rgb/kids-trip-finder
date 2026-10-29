@@ -18,6 +18,29 @@ describe("ViewTabs", () => {
     );
   });
 
+  test("행사, 키즈카페, 키즈펜션 탭이 이 순서로 있다", () => {
+    render(<ViewTabs view="events" />);
+
+    expect(screen.getAllByRole("tab").map((tab) => tab.textContent)).toEqual([
+      "행사",
+      "키즈카페",
+      "키즈펜션",
+    ]);
+  });
+
+  test("키즈펜션 보기면 키즈펜션 탭이 선택되어 있다", () => {
+    render(<ViewTabs view="pensions" />);
+
+    expect(screen.getByRole("tab", { name: "키즈펜션" })).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
+    expect(screen.getByRole("tab", { name: "키즈카페" })).toHaveAttribute(
+      "aria-selected",
+      "false",
+    );
+  });
+
   test("키즈카페 보기면 키즈카페 탭이 선택되어 있다", () => {
     render(<ViewTabs view="cafes" />);
 
