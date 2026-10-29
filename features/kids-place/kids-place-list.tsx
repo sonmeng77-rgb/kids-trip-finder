@@ -18,24 +18,27 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty";
 
-import type { KidsCafe } from "./kids-cafe";
+import type { KidsPlace } from "./kids-place";
 
-export function KidsCafeList({
-  cafes,
+export function KidsPlaceList({
+  places,
   truncated,
+  emptyTitle,
 }: {
-  cafes: KidsCafe[];
+  places: KidsPlace[];
   /** 검색된 곳이 가져올 수 있는 수보다 많아 일부만 보여 주는 경우 */
   truncated: boolean;
+  /** 장소가 하나도 없을 때의 안내 제목 */
+  emptyTitle: string;
 }) {
-  if (cafes.length === 0) {
+  if (places.length === 0) {
     return (
       <Empty className="border">
         <EmptyHeader>
           <EmptyMedia variant="icon">
             <SearchXIcon />
           </EmptyMedia>
-          <EmptyTitle>이 지역에서 찾은 키즈카페가 없습니다</EmptyTitle>
+          <EmptyTitle>{emptyTitle}</EmptyTitle>
           <EmptyDescription>다른 시·도를 선택해 보세요.</EmptyDescription>
         </EmptyHeader>
       </Empty>
@@ -49,30 +52,30 @@ export function KidsCafeList({
           <InfoIcon />
           <AlertTitle>일부만 보여요</AlertTitle>
           <AlertDescription>
-            이 지역에는 키즈카페가 더 많아요. 검색 순서대로 먼저 나온 곳만 보여 드립니다.
+            이 지역에는 더 많은 곳이 있어요. 검색 순서대로 먼저 나온 곳만 보여 드립니다.
           </AlertDescription>
         </Alert>
       )}
       <ul className="flex flex-col gap-3">
-        {cafes.map((cafe) => (
-          <li key={cafe.id}>
+        {places.map((place) => (
+          <li key={place.id}>
             <Card size="sm">
               <CardHeader>
-                <CardTitle className="text-base">{cafe.name}</CardTitle>
+                <CardTitle className="text-base">{place.name}</CardTitle>
               </CardHeader>
               <CardContent className="flex flex-col gap-1.5 text-sm">
                 <p className="flex items-start gap-1.5">
                   <MapPinIcon className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
-                  <span>{cafe.address}</span>
+                  <span>{place.address}</span>
                 </p>
-                {cafe.phone && (
+                {place.phone && (
                   <p className="flex items-start gap-1.5">
                     <PhoneIcon className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
-                    <span>{cafe.phone}</span>
+                    <span>{place.phone}</span>
                   </p>
                 )}
                 <a
-                  href={cafe.url}
+                  href={place.url}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex w-fit items-center gap-1.5 font-medium underline underline-offset-4"
@@ -89,7 +92,7 @@ export function KidsCafeList({
   );
 }
 
-export function KidsCafeRegionPrompt() {
+export function KidsPlaceRegionPrompt() {
   return (
     <Empty className="border">
       <EmptyHeader>
@@ -98,20 +101,20 @@ export function KidsCafeRegionPrompt() {
         </EmptyMedia>
         <EmptyTitle>시·도를 선택해 주세요</EmptyTitle>
         <EmptyDescription>
-          지도나 드롭다운에서 시·도를 고르면 그 지역의 키즈카페를 볼 수 있어요.
+          지도나 드롭다운에서 시·도를 고르면 그 지역의 목록을 볼 수 있어요.
         </EmptyDescription>
       </EmptyHeader>
     </Empty>
   );
 }
 
-export function KidsCafeLoadError() {
+export function KidsPlaceLoadError({ subject }: { subject: string }) {
   return (
     <Alert variant="destructive">
       <TriangleAlertIcon />
-      <AlertTitle>키즈카페 정보를 불러오지 못했습니다</AlertTitle>
+      <AlertTitle>{subject} 정보를 불러오지 못했습니다</AlertTitle>
       <AlertDescription>
-        잠시 후 다시 시도해 주세요. 행사 목록은 계속 볼 수 있습니다.
+        잠시 후 다시 시도해 주세요. 다른 목록은 계속 볼 수 있습니다.
       </AlertDescription>
     </Alert>
   );

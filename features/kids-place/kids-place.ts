@@ -1,4 +1,4 @@
-export type KidsCafe = {
+export type KidsPlace = {
   id: string;
   name: string;
   address: string;
@@ -7,10 +7,10 @@ export type KidsCafe = {
   url: string;
 };
 
-/** 키즈카페 정보를 가져오지 못했다. 메시지에는 인증키 등 민감한 값을 담지 않는다. */
-export class KidsCafeFetchError extends Error {
+/** 아이와 갈 만한 장소 정보를 가져오지 못했다. 메시지에는 인증키 등 민감한 값을 담지 않는다. */
+export class KidsPlaceFetchError extends Error {
   constructor(message: string) {
     super(message);
-    this.name = "KidsCafeFetchError";
+    this.name = "KidsPlaceFetchError";
   }
 }
