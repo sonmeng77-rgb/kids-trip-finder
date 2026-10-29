@@ -5,7 +5,7 @@ import { KidsPlaceRegionPrompt } from "@/features/kids-place";
 import { findRegion, REGIONS, RegionMap } from "@/features/region";
 
 import { FestivalFilters } from "./festival-filters";
-import { filterHref, type View } from "./filter-href";
+import { filterHref, parseView } from "./filter-href";
 import { RegionFestivals } from "./region-festivals";
 import { PLACE_VIEWS } from "./place-views";
 import { RegionKidsPlaces } from "./region-kids-places";
@@ -27,9 +27,7 @@ export default async function Home({
   const months = selectableMonths(todayInSeoul());
   const selectedMonth = months.find((option) => option.value === single(params.month));
   const month = selectedMonth?.value;
-  const requestedView = single(params.view);
-  const view: View =
-    requestedView === "cafes" || requestedView === "pensions" ? requestedView : "events";
+  const view = parseView(single(params.view));
 
   const heading =
     view !== "events"
@@ -45,7 +43,7 @@ export default async function Home({
           아이와 가기 좋은 축제·행사
         </h1>
         <p className="text-muted-foreground">
-          지도나 목록에서 지역을 고르고, 행사는 가려는 달을 정해 보세요. 키즈카페와 키즈펜션도 지역별로 찾아볼 수 있어요.
+          지도나 목록에서 지역을 고르고, 행사는 가려는 달을 정해 보세요. 키즈카페, 키즈펜션, 가볼만한곳도 지역별로 찾아볼 수 있어요.
         </p>
       </header>
 

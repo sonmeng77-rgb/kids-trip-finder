@@ -1,6 +1,23 @@
 import { expect, test } from "vitest";
 
-import { filterHref } from "@/app/filter-href";
+import { filterHref, parseView } from "@/app/filter-href";
+
+test("주소의 view 값이 알려진 보기면 그대로 쓰고, 그 밖이면 행사로 본다", () => {
+  expect(parseView("cafes")).toBe("cafes");
+  expect(parseView("pensions")).toBe("pensions");
+  expect(parseView("spots")).toBe("spots");
+  expect(parseView("events")).toBe("events");
+  expect(parseView("hotel")).toBe("events");
+  expect(parseView("toString")).toBe("events");
+  expect(parseView(undefined)).toBe("events");
+});
+
+test("가볼만한곳 보기는 view=spots로 주소에 담는다", () => {
+  expect(filterHref({ view: "spots" })).toBe("/?view=spots");
+  expect(filterHref({ regionId: "seoul", month: "2026-11", view: "spots" })).toBe(
+    "/?region=seoul&month=2026-11&view=spots",
+  );
+});
 
 test("아무것도 고르지 않으면 루트 주소를 돌려준다", () => {
   expect(filterHref({})).toBe("/");
