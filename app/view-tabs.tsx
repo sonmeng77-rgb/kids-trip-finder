@@ -7,7 +7,7 @@ import type { RegionId } from "@/features/region";
 
 import { filterHref, type View } from "./filter-href";
 
-/** 목록에서 무엇을 볼지(행사, 키즈카페, 키즈펜션) 고른다. 고르면 선택이 담긴 주소로 이동한다. */
+/** 목록에서 무엇을 볼지(행사, 키즈카페, 키즈펜션, 가볼만한곳) 고른다. 고르면 선택이 담긴 주소로 이동한다. */
 export function ViewTabs({
   view,
   regionId,
@@ -30,6 +30,7 @@ export function ViewTabs({
         <TabsTrigger value="events">행사</TabsTrigger>
         <TabsTrigger value="cafes">키즈카페</TabsTrigger>
         <TabsTrigger value="pensions">키즈펜션</TabsTrigger>
+        <TabsTrigger value="spots">가볼만한곳</TabsTrigger>
       </TabsList>
     </Tabs>
   );

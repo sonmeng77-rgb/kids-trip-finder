@@ -18,14 +18,25 @@ describe("ViewTabs", () => {
     );
   });
 
-  test("행사, 키즈카페, 키즈펜션 탭이 이 순서로 있다", () => {
+  test("행사, 키즈카페, 키즈펜션, 가볼만한곳 탭이 이 순서로 있다", () => {
     render(<ViewTabs view="events" />);
 
     expect(screen.getAllByRole("tab").map((tab) => tab.textContent)).toEqual([
       "행사",
       "키즈카페",
       "키즈펜션",
+      "가볼만한곳",
     ]);
+  });
+
+  test("가볼만한곳 보기면 가볼만한곳 탭만 선택되어 있다", () => {
+    render(<ViewTabs view="spots" />);
+
+    expect(screen.getByRole("tab", { name: "가볼만한곳" })).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
+    expect(screen.getByRole("tab", { name: "행사" })).toHaveAttribute("aria-selected", "false");
   });
 
   test("키즈펜션 보기면 키즈펜션 탭이 선택되어 있다", () => {
