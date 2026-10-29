@@ -1,3 +1,5 @@
+import type { ReactNode } from "react";
+
 import {
   ExternalLinkIcon,
   InfoIcon,
@@ -24,12 +26,15 @@ export function KidsPlaceList({
   places,
   truncated,
   emptyTitle,
+  renderAction,
 }: {
   places: KidsPlace[];
   /** 검색된 곳이 가져올 수 있는 수보다 많아 일부만 보여 주는 경우 */
   truncated: boolean;
   /** 장소가 하나도 없을 때의 안내 제목 */
   emptyTitle: string;
+  /** 항목마다 덧붙일 동작(예: 계획에 담기 버튼) */
+  renderAction?: (place: KidsPlace) => ReactNode;
 }) {
   if (places.length === 0) {
     return (
@@ -83,6 +88,7 @@ export function KidsPlaceList({
                   카카오맵에서 보기
                   <ExternalLinkIcon className="size-4" />
                 </a>
+                {renderAction?.(place)}
               </CardContent>
             </Card>
           </li>

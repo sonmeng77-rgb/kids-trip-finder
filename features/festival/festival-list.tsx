@@ -1,3 +1,5 @@
+import type { ReactNode } from "react";
+
 import { CalendarOffIcon, MapPinIcon, TriangleAlertIcon } from "lucide-react";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -18,13 +20,21 @@ function formatDate(date: string) {
   return `${date.slice(0, 4)}.${date.slice(4, 6)}.${date.slice(6, 8)}`;
 }
 
-function formatPeriod(festival: Festival) {
+/** 개최 기간을 2026.10.30 ~ 2026.11.01 모양으로. 하루짜리면 날짜를 한 번만 쓴다. */
+export function formatFestivalPeriod(festival: Pick<Festival, "startDate" | "endDate">) {
   return festival.startDate === festival.endDate
     ? formatDate(festival.startDate)
     : `${formatDate(festival.startDate)} ~ ${formatDate(festival.endDate)}`;
 }
 
-export function FestivalList({ festivals }: { festivals: Festival[] }) {
+export function FestivalList({
+  festivals,
+  renderAction,
+}: {
+  festivals: Festival[];
+  /** 항목마다 덧붙일 동작(예: 계획에 담기 버튼) */
+  renderAction?: (festival: Festival) => ReactNode;
+}) {
   if (festivals.length === 0) {
     return (
       <Empty className="border">
@@ -49,7 +59,7 @@ export function FestivalList({ festivals }: { festivals: Festival[] }) {
             <CardHeader>
               <CardTitle className="text-base">{festival.title}</CardTitle>
               <p className="text-sm text-muted-foreground">
-                {formatPeriod(festival)}
+                {formatFestivalPeriod(festival)}
               </p>
             </CardHeader>
             <CardContent>
@@ -57,6 +67,7 @@ export function FestivalList({ festivals }: { festivals: Festival[] }) {
                 <MapPinIcon className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
                 <span>{festival.place}</span>
               </p>
+              {renderAction?.(festival)}
             </CardContent>
           </Card>
         </li>

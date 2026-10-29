@@ -8,6 +8,9 @@ import {
   todayInSeoul,
 } from "@/features/festival";
 import { resolveRegion, type Region } from "@/features/region";
+import { AddToPlanButton } from "@/features/trip-plan";
+
+import { festivalToPlanItem } from "./plan-items";
 
 /**
  * 고른 시·도와 월에 맞는 진행 중이거나 예정된 행사 목록. 고르지 않은 조건은 적용하지 않는다.
@@ -30,6 +33,7 @@ export async function RegionFestivals({
 
   return (
     <FestivalList
+      renderAction={(festival) => <AddToPlanButton item={festivalToPlanItem(festival)} />}
       festivals={festivals.filter(
         (festival) =>
           (!region ||
